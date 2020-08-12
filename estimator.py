@@ -1,6 +1,5 @@
 import config
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Estimator():
     """Estimate state"""
@@ -23,15 +22,25 @@ class Estimator():
         self.MEASUREMENTS = np.matrix(config.MEASUREMENTS)
         #print(self.MEASUREMENTS)
         self.N_MEASUREMENTS = self.MEASUREMENTS.shape[1]
-        X_EST = np.zeros((self.A.shape[0], self.N_MEASUREMENTS))
+        self.X_estimate_array = np.zeros((self.A.shape[0], self.N_MEASUREMENTS))
+        #print(self.X_estimate_array.shape)
         self.i = 0
+        self.print_values = False
+
 
     def estimate_current_state(self):
         """State update equation"""
         z = self.last_measurement
         x_hat = (1 - self.K).dot(self.X_estimate) + self.K.dot(z)
         self.X_estimate = x_hat
-        print(f"current estimate: {self.X_estimate}")
+        self.print(f"current estimate: {self.X_estimate}")
+        self.X_estimate_array[:, self.i] = self.X_estimate
+
+
+
+    def print(self, str):
+        if self.print_values:
+            print(str)
 
 
     def predict_next_state(self):
@@ -40,19 +49,19 @@ class Estimator():
         if self.B is not None and self.u is not None:
             x_hat += self.B.dot(self.u)
         self.X_estimate = x_hat
-        print(f"predicted next: {self.X_estimate}")
+        self.print(f"predicted next: {self.X_estimate}")
 
 
     def update_kalman_gain(self):
         """Kalman Gain update"""
         self.K = self.p / (self.p + self.r)
-        print(f"kalman gain: {self.K}")
+        self.print(f"kalman gain: {self.K}")
 
 
     def update_estimate_uncertainty(self):
         """Covariance update"""
         self.p = (1 - self.K).dot(self.p)
-        print(f"cov: {self.p}")
+        self.print(f"cov: {self.p}")
 
 
     def increment_iteration(self):
@@ -62,34 +71,13 @@ class Estimator():
     def covariance_extrapolation(self):
         """Covariance extrapolation"""
         self.p = self.p
-        print(f"cov: {self.p}")
+        self.print(f"cov: {self.p}")
 
 
     def make_measurement(self):
         self.last_measurement = self.MEASUREMENTS[:, self.i]
-        print(f"measurement: {self.last_measurement}")
+        self.print(f"measurement: {self.last_measurement}")
 
 
     def estimated_state(self):
         return self.X_estimate
-
-
-
-
-
-    def example_plot2(self):
-        x = np.linspace(0,10,50)
-        y = x**2
-
-        plt.ion()
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-
-        l,  = plt.plot(x[0], y[0], "r-")
-
-        for i in range(len(x)):
-            l.set_data(y[:i], x[:i])
-            ax.relim()
-            ax.autoscale_view(True, True, True)
-            plt.draw()
-            plt.pause(0.1)

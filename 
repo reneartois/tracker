@@ -1,0 +1,183 @@
+[1mdiff --git a/config.py b/config.py[m
+[1mindex cf73eab..5226e16 100644[m
+[1m--- a/config.py[m
+[1m+++ b/config.py[m
+[36m@@ -14,7 +14,7 @@[m [mX0 = [[60]][m
+ K = [0.9][m
+ [m
+ # measurements[m
+[31m-TRUE_VALUE = 50[m
+[32m+[m[32mTRUE_VALUE = [50][m
+ MEASUREMENTS = [[48.54, 47.11, 55.01, 55.15, 49.89,[m
+                 40.85, 46.72, 50.05, 51.27, 49.95]][m
+ [m
+[1mdiff --git a/estimator.py b/estimator.py[m
+[1mindex 1688449..1e404ae 100644[m
+[1m--- a/estimator.py[m
+[1m+++ b/estimator.py[m
+[36m@@ -1,6 +1,5 @@[m
+ import config[m
+ import numpy as np[m
+[31m-import matplotlib.pyplot as plt[m
+ [m
+ class Estimator():[m
+     """Estimate state"""[m
+[36m@@ -23,15 +22,25 @@[m [mclass Estimator():[m
+         self.MEASUREMENTS = np.matrix(config.MEASUREMENTS)[m
+         #print(self.MEASUREMENTS)[m
+         self.N_MEASUREMENTS = self.MEASUREMENTS.shape[1][m
+[31m-        X_EST = np.zeros((self.A.shape[0], self.N_MEASUREMENTS))[m
+[32m+[m[32m        self.X_estimate_array = np.zeros((self.A.shape[0], self.N_MEASUREMENTS))[m
+[32m+[m[32m        #print(self.X_estimate_array.shape)[m
+         self.i = 0[m
+[32m+[m[32m        self.print_values = False[m
+[32m+[m
+ [m
+     def estimate_current_state(self):[m
+         """State update equation"""[m
+         z = self.last_measurement[m
+         x_hat = (1 - self.K).dot(self.X_estimate) + self.K.dot(z)[m
+         self.X_estimate = x_hat[m
+[31m-        print(f"current estimate: {self.X_estimate}")[m
+[32m+[m[32m        self.print(f"current estimate: {self.X_estimate}")[m
+[32m+[m[32m        self.X_estimate_array[:, self.i] = self.X_estimate[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    def print(self, str):[m
+[32m+[m[32m        if self.print_values:[m
+[32m+[m[32m            print(str)[m
+ [m
+ [m
+     def predict_next_state(self):[m
+[36m@@ -40,19 +49,19 @@[m [mclass Estimator():[m
+         if self.B is not None and self.u is not None:[m
+             x_hat += self.B.dot(self.u)[m
+         self.X_estimate = x_hat[m
+[31m-        print(f"predicted next: {self.X_estimate}")[m
+[32m+[m[32m        self.print(f"predicted next: {self.X_estimate}")[m
+ [m
+ [m
+     def update_kalman_gain(self):[m
+         """Kalman Gain update"""[m
+         self.K = self.p / (self.p + self.r)[m
+[31m-        print(f"kalman gain: {self.K}")[m
+[32m+[m[32m        self.print(f"kalman gain: {self.K}")[m
+ [m
+ [m
+     def update_estimate_uncertainty(self):[m
+         """Covariance update"""[m
+         self.p = (1 - self.K).dot(self.p)[m
+[31m-        print(f"cov: {self.p}")[m
+[32m+[m[32m        self.print(f"cov: {self.p}")[m
+ [m
+ [m
+     def increment_iteration(self):[m
+[36m@@ -62,34 +71,13 @@[m [mclass Estimator():[m
+     def covariance_extrapolation(self):[m
+         """Covariance extrapolation"""[m
+         self.p = self.p[m
+[31m-        print(f"cov: {self.p}")[m
+[32m+[m[32m        self.print(f"cov: {self.p}")[m
+ [m
+ [m
+     def make_measurement(self):[m
+         self.last_measurement = self.MEASUREMENTS[:, self.i][m
+[31m-        print(f"measurement: {self.last_measurement}")[m
+[32m+[m[32m        self.print(f"measurement: {self.last_measurement}")[m
+ [m
+ [m
+     def estimated_state(self):[m
+         return self.X_estimate[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-    def example_plot2(self):[m
+[31m-        x = np.linspace(0,10,50)[m
+[31m-        y = x**2[m
+[31m-[m
+[31m-        plt.ion()[m
+[31m-        fig = plt.figure()[m
+[31m-        ax = fig.add_subplot(111)[m
+[31m-[m
+[31m-        l,  = plt.plot(x[0], y[0], "r-")[m
+[31m-[m
+[31m-        for i in range(len(x)):[m
+[31m-            l.set_data(y[:i], x[:i])[m
+[31m-            ax.relim()[m
+[31m-            ax.autoscale_view(True, True, True)[m
+[31m-            plt.draw()[m
+[31m-            plt.pause(0.1)[m
+[1mdiff --git a/tracker.py b/tracker.py[m
+[1mindex b283b08..de7df12 100644[m
+[1m--- a/tracker.py[m
+[1m+++ b/tracker.py[m
+[36m@@ -1,8 +1,33 @@[m
+ import config[m
+ import numpy as np[m
+ from estimator import Estimator[m
+[32m+[m[32mimport matplotlib.pyplot as plt[m
+ [m
+ [m
+[32m+[m[32mdef plot_estimate(Y_DATA):[m
+[32m+[m[32m    n_measurements = Y_DATA.shape[1][m
+[32m+[m[32m    n_states = Y_DATA.shape[0][m
+[32m+[m[32m    x = np.linspace(1, n_measurements, n_measurements)[m
+[32m+[m[32m    y = np.transpose(Y_DATA)[m
+[32m+[m
+[32m+[m[32m    y_true = np.full((n_measurements, n_states), config.TRUE_VALUE)[m
+[32m+[m
+[32m+[m[32m    plt.ion()[m
+[32m+[m[32m    fig = plt.figure()[m
+[32m+[m[32m    ax = fig.add_subplot(111)[m
+[32m+[m
+[32m+[m[32m    l,  = plt.plot(x[0], y[0], "r-")[m
+[32m+[m[32m    l2, = plt.plot(x, y_true, "b-")[m
+[32m+[m
+[32m+[m[32m    for i in range(len(x)):[m
+[32m+[m[32m        l.set_data(x[:i], y[:i])[m
+[32m+[m[32m        #l2.set_data(x[:i], y_true[:i])[m
+[32m+[m[32m        ax.relim()[m
+[32m+[m[32m        ax.autoscale_view(True, True, True)[m
+[32m+[m[32m        plt.draw()[m
+[32m+[m[32m        plt.pause(1)[m
+[32m+[m[32m    input("Press Enter to exit...")[m
+[32m+[m
+ def test_tracking():[m
+     """test estimator"""[m
+     est = Estimator()[m
+[36m@@ -12,21 +37,27 @@[m [mdef test_tracking():[m
+     est.predict_next_state()[m
+     est.covariance_extrapolation()[m
+     for m in range(est.N_MEASUREMENTS):[m
+[31m-        print(est.i + 1)[m
+[32m+[m[32m        if est.print_values:[m
+[32m+[m[32m            print(est.i + 1)[m
+         #measure[m
+         est.make_measurement()[m
+[31m-[m
+         #update[m
+         est.update_kalman_gain()[m
+         est.estimate_current_state()[m
+         est.update_estimate_uncertainty()[m
+[31m-[m
+[32m+[m[32m        #predict[m
+         est.predict_next_state()[m
+         est.covariance_extrapolation()[m
+ [m
+         est.increment_iteration()[m
+[31m-        print("")[m
+[32m+[m[32m        if est.print_values:[m
+[32m+[m[32m            print("")[m
+[32m+[m
+[32m+[m[32m    X_EST = est.X_estimate_array[m
+[32m+[m[32m    return X_EST[m
+ [m
+ [m
+ if __name__ == "__main__":[m
+[31m-    test_tracking()[m
+[32m+[m[32m    X_EST = test_tracking()[m
+[32m+[m[32m    #print(X_EST)[m
+[32m+[m[32m    plot_estimate(X_EST)[m
