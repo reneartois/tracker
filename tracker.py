@@ -1,6 +1,7 @@
 import config
 import numpy as np
 from estimator import Estimator
+from cannon import Cannon
 import matplotlib.pyplot as plt
 
 
@@ -58,6 +59,10 @@ def test_tracking():
 
 
 if __name__ == "__main__":
-    X_EST = test_tracking()
+    #X_EST = test_tracking()
     #print(X_EST)
-    plot_estimate(X_EST)
+    #plot_estimate(X_EST)
+    c = Cannon(80, 60)
+    c.solve()
+    c.solve_analytically()
+    c.plot()
