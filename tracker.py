@@ -33,7 +33,7 @@ def test_tracking():
     est = Estimator()
     #est.example_plot2()
 
-    #predict
+    #initial prediction
     est.predict_next_state()
     est.covariance_extrapolation()
     for m in range(est.N_MEASUREMENTS):
