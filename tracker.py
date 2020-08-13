@@ -1,7 +1,8 @@
 import config
 import numpy as np
 from estimator import Estimator
-from cannon import Cannon
+from models import Cannon
+from models import Rocket
 import matplotlib.pyplot as plt
 
 
@@ -32,7 +33,6 @@ def plot_estimate(Y_DATA):
 def test_tracking():
     """test estimator"""
     est = Estimator()
-    #est.example_plot2()
 
     #initial prediction
     est.predict_next_state()
@@ -62,7 +62,10 @@ if __name__ == "__main__":
     #X_EST = test_tracking()
     #print(X_EST)
     #plot_estimate(X_EST)
-    c = Cannon(80, 60)
-    c.solve()
-    c.solve_analytically()
-    c.plot()
+    #c = Cannon(80, 60)
+    #c.solve()
+    #c.solve_analytically()
+    #c.plot()
+    r = Rocket(angle= 80,speed= 250)
+    r.solve()
+    r.plot()
