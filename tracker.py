@@ -1,26 +1,22 @@
 import config
 import numpy as np
 from estimator import Estimator
-from models import Cannon
-from models import Rocket
+from models import Vehicle
 import matplotlib.pyplot as plt
 
 
-def plot_estimate(Y_DATA):
-    n_measurements = Y_DATA.shape[1]
-    n_states = Y_DATA.shape[0]
+def plot_dynamic_estimate(y_data):
+    n_states = y_data.shape[0]
+    n_measurements = y_data.shape[1]
+
     x = np.linspace(1, n_measurements, n_measurements)
     y = np.transpose(Y_DATA)
-
     y_true = np.full((n_measurements, n_states), config.TRUE_VALUE)
-
     plt.ion()
     fig = plt.figure()
     ax = fig.add_subplot(111)
-
     l,  = plt.plot(x[0], y[0], "r-")
     l2, = plt.plot(x, y_true, "b-")
-
     for i in range(len(x)):
         l.set_data(x[:i], y[:i])
         #l2.set_data(x[:i], y_true[:i])
@@ -30,42 +26,37 @@ def plot_estimate(Y_DATA):
         plt.pause(1)
     input("Press Enter to exit...")
 
-def test_tracking():
-    """test estimator"""
-    est = Estimator()
 
+def estimate_trajectory_1():
+    """test estimator on trajectory data"""
+    # generate data
+    v = Vehicle()
+    x_true = v.generate_trajectory_1()
+    y_w = v.generate_measurements()
+
+    # edit v measurements
+    #y_w[1, :] = np.ones((1, y_w.shape[1]))*999
+    # estimations
+    x_est = np.zeros((y_w.shape))
+
+    est = Estimator()
     #initial prediction
     est.predict_next_state()
     est.covariance_extrapolation()
-    for m in range(est.N_MEASUREMENTS):
-        if est.print_values:
-            print(est.i + 1)
+    for i in range(y_w.shape[1]):
         #measure
-        est.make_measurement()
+        est.make_measurement(y_w[:, i])
         #update
         est.update_kalman_gain()
-        est.estimate_current_state()
+        x_hat = np.reshape(est.estimate_current_state(), (y_w.shape[0]))
+        x_est[:, i] = x_hat
         est.update_estimate_uncertainty()
         #predict
         est.predict_next_state()
         est.covariance_extrapolation()
 
-        est.increment_iteration()
-        if est.print_values:
-            print("")
-
-    X_EST = est.X_estimate_array
-    return X_EST
+    v.plot_trajectory_1(x_est, x_true)
 
 
 if __name__ == "__main__":
-    #X_EST = test_tracking()
-    #print(X_EST)
-    #plot_estimate(X_EST)
-    #c = Cannon(80, 60)
-    #c.solve()
-    #c.solve_analytically()
-    #c.plot()
-    r = Rocket(angle= 80,speed= 250)
-    r.solve()
-    r.plot()
+    estimate_trajectory_1()
