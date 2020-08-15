@@ -33,7 +33,7 @@ def estimate_trajectory_1():
     v = Vehicle()
     x_true = v.generate_trajectory_1()
     y_w = v.generate_measurements()
-
+    #print(y_w.shape)
     # edit v measurements
     #y_w[1, :] = np.ones((1, y_w.shape[1]))*999
     # estimations

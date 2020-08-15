@@ -55,8 +55,12 @@ class Estimator():
     def estimate_current_state(self):
         """State update"""
         x = self.X_estimate
+        #print(x.shape)
+        #print(self.H)
         z = self.last_measurement
+        #print(z.shape)
         e = z - self.H.dot(x)
+        #print(e.shape)
         self.X_estimate = x + self.K.dot(e)
         self.print(f"current estimate: {self.X_estimate}")
         #print(self.X_estimate.shape)
@@ -67,6 +71,11 @@ class Estimator():
         """Covariance update"""
         i_minus_kh = self.I - self.K.dot(self.H)
         i_minus_kh_t = np.transpose(i_minus_kh)
+        #print(i_minus_kh.shape)
+        #print(i_minus_kh_t.shape)
+        #print(self.K.shape)
+        #print(self.R.shape)
+
         krk = self.K.dot(self.R).dot(np.transpose(self.K))
         self.P = i_minus_kh.dot(self.P).dot(i_minus_kh_t) + krk
         self.print(f"cov: {self.P}")
@@ -91,7 +100,11 @@ class Estimator():
         """
         # z = H*x + noise
         # C -observation matrix
-        self.last_measurement = self.H.dot(y)
+        y = np.reshape(y, (y.shape[0], 1))
+        #print("y:", y.shape)
+        #print("h:", self.H.shape)
+        self.last_measurement = self.H @ y
+        #print("x" ,self.last_measurement.shape)
         self.print(f"measurement: {self.last_measurement}")
 
 
