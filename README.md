@@ -3,8 +3,8 @@ Visualize kalman filter
 
 ## use:
 in python env:
->>pip install -r requirements.txt
->>python app.py
+pip install -r requirements.txt
+python app.py
 
 ## some inspiration:
 - Understanding the Basis of the Kalman Filter via a Simple and Intuitive Derivation, R. Faragher.
