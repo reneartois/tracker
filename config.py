@@ -1,40 +1,73 @@
 """
-Notations from:
-Understanding the Basis of the Kalman Filter via a Simple and Intuitive Derivation, R. Faragher.
-Signal Processing Magazine, IEEE , vol.29, no.5, pp.128-132, Sept. 2012 doi: 10.1109/MSP.2012.2203621
+config file for KalmanFilter_Custom
 """
 # dt
-dt = 0.1
+
+dt = 1
+
 # state transition matrix, nx * nx
 F = [[1, dt],
      [0, 1]]
+F = [[1]]
+F = [[1, 0, dt, 0],
+     [0, 1, 0, dt],
+     [0, 0, 1, 0],
+     [0, 0, 0, 1]]
+F = [[1, dt, 0, 0],
+     [0, 1, 0, 0],
+     [0, 0, 1, dt],
+     [0, 0, 0, 1]]
+
 # control input transaction matrix, nx * nu
 B = None
+
 # control inputs,
 u = None
+
 #Observation matrix, nz * nx
-#H = [1, 1]
 H = [[1, 0],
      [0, 1]]
+H = [1]
+H = [[1, 0, 0, 0],
+     [0, 0, 1, 0]]
+
+
 # kalman filter gain, nx * nz
-K = [[1, 0],
+# weigth of measurement, (1- K) is weight of estimate
+K0 = [[1, 0],
      [0, 1]]
+K0 = [[0.8]]
+K0 = [[1, 0],
+     [0, 0],
+     [0, 1],
+     [0, 0]]
+
 # measurement uncertainty, std dev, nz * nz
-r0 = [1, 1]
+R = [0.1]
+R = [[0.1, 0],
+     [0, 0.1]]
+Rr = [[0, 0, 0, 0],
+     [0, 0, 0, 0],
+     [0, 0, 0, 0],
+     [0, 0, 0, 0]]
+
+
 # process noise uncertainty, std dev, nx * nx
 # 0 = no process noise. small q: lag error. high q: filter follows measurements
-# if uncorrelated, estimator creates eye matrix from q0_vector, otherwize, specify q0_matrix
-Q_UNCORRELATED= False
-q0_v = [0.7, 0.7]
-q0_m = [[0.8, 0.8],
-        [0.8, 0.8]]
-# state estimation uncertainty, std dev, xz * nx
-p0 = [0.1, 0.5]
+q0 = 0.1
+Q = [[0, 0, 0, 0],
+     [0, 0.1, 0, 0],
+     [0, 0, 0, 0],
+     [0, 0, 0, 0.1]]
+
+# state estimation uncertainty, std dev, nx * nx
+P0 = [100]
+P0 = [[0, 0, 0, 0],
+     [0, 0, 0, 0],
+     [0, 0, 0, 0],
+     [0, 0, 0, 0]]
 
 # Options
-PRINT_VALUES = False
+PRINT_VALUES = True
 # initial values
-X0 = [0, 10]
-
-
-#pykalman?
+X0 = [0, 1, 0, 0]
