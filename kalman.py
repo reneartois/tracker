@@ -6,7 +6,7 @@ class KalmanFilter:
     """
     Kalman filter
     """
-    def __init__(self, X0= None):
+    def __init__(self, X0= None, nz=None):
         """
         KF
         ---
@@ -17,9 +17,13 @@ class KalmanFilter:
         if X0 is None:
             X0 = config.X0
         self.X_hat = np.transpose(np.matrix(X0))
+        self.N_STATES = self.X_hat.shape[0]
+        if nz is None:
+            nz = config.nz
+        self.N_MEAS = nz
+
         # state transition matrix
-        self.F = np.matrix(config.F)
-        self.N_STATES = self.F.shape[0]
+        self.F = np.matrix(config.F)[: self.N_STATES, : self.N_STATES]
         # control input transaction matrix
         self.B = None
         # control matrix
@@ -28,15 +32,15 @@ class KalmanFilter:
             self.B = np.matrix(config.B)
             self.u = np.matrix(config.u)
         # observation matrix
-        self.H = np.matrix(config.H)
+        self.H = np.matrix(config.H)[: self.N_MEAS, : self.N_STATES]
         # kalman gain
-        self.K = np.matrix(config.K0)
+        self.K = np.matrix(config.K0)[: self.N_STATES, : self.N_MEAS]
         # measurement uncertainty, covariance matrix
-        self.R = np.matrix(config.R)**2
+        self.R = np.matrix(config.R)[: self.N_MEAS, : self.N_MEAS]
         # process noise uncertainty, cov matrix
-        self.Q = np.matrix(config.Q)**2
+        self.Q = np.matrix(config.Q)[: self.N_STATES, : self.N_STATES]
         # state estimation uncertainty cov matrix
-        self.P = np.matrix(config.P0)**2
+        self.P = np.matrix(config.P0)[: self.N_STATES, : self.N_STATES]
 
         self.last_measurement = self.X_hat
         self.I = np.eye(self.K.shape[0])
@@ -85,6 +89,9 @@ class KalmanFilter:
 
     def update_kalman_gain(self):
         """Kalman Gain update"""
+        print(self.R)
+        print(self.P)
+        print(self.H)
         hph_r = self.H.dot(self.P).dot(np.transpose(self.H)) + self.R
         hph_r = np.linalg.inv(hph_r)
         self.K = self.P.dot(np.transpose(self.H)).dot(hph_r)

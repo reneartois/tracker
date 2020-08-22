@@ -6,6 +6,7 @@ import tkinter
 class Trajectory:
     """
     Generate trajectory for KF
+    NOT USED
     """
     def __init__(self, dt, n_points, X0):
         """
@@ -84,5 +85,5 @@ class Trajectory:
 
 
     def generate_measurements(self, sigma, mu=0):
-        r =self.X + np.random.randn(self.X.shape[0], self.X.shape[0]) * self.sigma + self.mu
+        r =self.X + np.random.randn(self.X.shape[0], self.X.shape[1]) * self.sigma + self.mu
         return r
