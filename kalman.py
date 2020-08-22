@@ -38,7 +38,11 @@ class KalmanFilter:
         # measurement uncertainty, covariance matrix
         self.R = np.matrix(config.R)[: self.N_MEAS, : self.N_MEAS]
         # process noise uncertainty, cov matrix
-        self.Q = np.matrix(config.Q)[: self.N_STATES, : self.N_STATES]
+        #self.Q = np.matrix(config.Q)[: self.N_STATES, : self.N_STATES]
+        #Qv = self.F.dot(np.matrix(Qv)).dot(self.F.T)
+        #print(Qv)
+        self.Q = self.F.dot(np.matrix(config.Qv)).dot(self.F.T)
+        print(self.Q)
         # state estimation uncertainty cov matrix
         self.P = np.matrix(config.P0)[: self.N_STATES, : self.N_STATES]
 
