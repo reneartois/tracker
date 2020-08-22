@@ -104,16 +104,14 @@ class Gui:
         x_true = (event.x)
         y_true = (event.y)
 
-        # add noise
-        [x_meas, y_meas] = self.generate_measurements(X= [x_true, y_true])
         # measure
+        [x_meas, y_meas] = self.generate_measurements(X= [x_true, y_true])
+        # add noise
         self.kf.make_measurement(np.array([x_meas, 0, y_meas, 0]).T)
-        #self.kf.make_measurement(np.array([x_meas, y_meas, 0, 0]).T)
 
         # update
         K = np.array(self.kf.update_kalman_gain()).T
         [x_est, vx_est, y_est, vy_est] = np.array(self.kf.estimate_current_state()).T
-        #[x_est, y_est, _, _] = np.array(self.kf.estimate_current_state()).T
         P = self.kf.update_estimate_uncertainty()
 
         #predict
@@ -128,20 +126,39 @@ class Gui:
         x_meas = np.int(np.asscalar(np.round(x_meas)))
         y_meas = np.int(np.asscalar(np.round(y_meas)))
 
-        d = self.canvas_oval_delta
+        # clear canvas
+        self.w.delete("all")
+
+        # redraw
         if self.Show_True_Values:
-            self.true_val_idx = self.remove_points(x_true, y_true, self.true_val_idx, "cross")
-            self.draw_cross(x_true, y_true, self.canvas_true_val_color)
+            self.update_points(self.true_val_idx, x_true, y_true)
+            self.draw_points(self.true_val_idx, type= "cross", color= self.canvas_true_val_color)
         if self.Show_Est_Values:
-            self.est_val_idx = self.remove_points(x_est, y_est, self.est_val_idx, "oval")
-            self.w.create_oval(x_est-d, y_est-d, x_est+self.canvas_oval_delta, y_est+self.canvas_oval_delta, fill= self.canvas_estimate_color )
+            self.update_points(self.est_val_idx, x_est, y_est)
+            self.draw_points(self.est_val_idx, type= "oval", color= self.canvas_estimate_color)
         if self.Show_Measured_Values:
-            self.meas_val_idx = self.remove_points(x_meas, y_meas, self.meas_val_idx, "oval")
-            self.w.create_oval(x_meas-d, y_meas-d, x_meas+self.canvas_oval_delta, y_meas+self.canvas_oval_delta, fill= self.canvas_measurement_color )
+            self.update_points(self.meas_val_idx, x_meas, y_meas)
+            self.draw_points(self.meas_val_idx, type= "oval", color= self.canvas_measurement_color)
 
         self.update_display_labels(self.display_var, x_true, y_true, x_meas, y_meas, x_est, y_est, vx_est, vy_est)
         self.update_matrix_label(self.P_var, self.kf.P, "P")
         self.update_matrix_label(self.K_var, self.kf.K, "K")
+
+
+    def draw_points(self, val, type, color):
+        d = self.canvas_oval_delta
+        for [x, y] in val.T:
+            if x > -1:
+                if type == "cross":
+                    self.draw_cross(x, y, color)
+                else:
+                    self.w.create_oval(x-d, y-d, x+d, y+d, fill= color)
+
+
+    def update_points(self,val, x, y):
+        val[:, :] = np.roll(val, 1, axis= 1)
+        val[:, 0] = [x, y]
+        return val
 
 
     def draw_cross(self, x, y, color):
@@ -151,20 +168,6 @@ class Gui:
         y2 = int((y + self.canvas_oval_delta/2))
         self.w.create_line(x1, y1, x2+1, y2+1, fill= color)
         self.w.create_line(x1, y2, x2+1, y1+1, fill= color)
-
-
-
-    def remove_points(self, x, y, val, type):
-        d = self.canvas_oval_delta
-        [last_x, last_y] = val[:, -1]
-        val[:, :] = np.roll(val, 1, axis= 1)
-        val[:, 0] = [x, y]
-        if last_x > -1:
-            if type == "cross":
-                self.draw_cross(last_x, last_y, self.canvas_bg_color)
-            else:
-                self.w.create_oval(last_x-d, last_y-d, last_x+self.canvas_oval_delta, last_y+self.canvas_oval_delta, fill= self.canvas_bg_color)
-        return val
 
 
     def generate_measurements(self, X):
