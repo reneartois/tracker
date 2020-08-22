@@ -6,6 +6,10 @@ class Gui:
 
     def __init__(self, master):
         # settings
+        master.title("Estimator")
+        master_width = 1000
+        master_heigth = 600
+        master.geometry(f"{master_width}x{master_heigth}")
         self.Show_True_Values = True
         self.Show_Measured_Values = True
         self.Show_Est_Values = True
@@ -15,27 +19,54 @@ class Gui:
         stored_values = 40
 
         # frames
-        canvas_frame = tk.Frame(master)
+        canvas_width = 1000
+        canvas_height =400
+        main_frame_heigth = 200
+        canvas_frame = tk.Frame(master, height= canvas_height)
+        main_frame = tk.Frame(master, width= canvas_width, height= main_frame_heigth)
 
-        #layout all main containers
+        # layout
         master.grid_rowconfigure(0, weight=1)
         master.grid_columnconfigure(0, weight=1)
 
+        # main frames
+        canvas_frame.grid(row=0, column= 0,  sticky= "NESW", padx= 5, pady= 5)
+        main_frame.grid(row=1, column= 0, sticky= "NESW", padx= 5, pady= 5)
 
         # canvas
-        canvas_width = 1000
-        canvas_height =500
         self.canvas_bg_color = "black"
         self.canvas_true_val_color = "red"
         self.canvas_measurement_color = "blue"
         self.canvas_estimate_color = "green"
-        self.w = tk.Canvas(master,
-               width= canvas_width,
-               height= canvas_height,
+        self.w = tk.Canvas(canvas_frame,
                bg= self.canvas_bg_color)
-        self.w.grid(row = 0, columnspan=6, sticky= "NESW", padx=5, pady = 5)
+        self.w.pack(fill="both", expand=True)
         self.w.bind("<B1-Motion>", self.update_canvas)  #drag
         self.w.bind("<Button-1>", self.update_canvas)   #click
+
+        # display frames
+        frame_width=350
+        padx= 40
+        pady=5
+        display_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        display_frame.grid(row=0, column=0, sticky= "NW")
+        P_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        P_frame.grid(row=0, column=1, sticky= "NW")
+        K_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        K_frame.grid(row=0, column=2, sticky= "NW")
+
+        # display frame labels
+        self.display_var = tk.StringVar()
+        display_label = tk.Label(display_frame, textvariable= self.display_var)
+        display_label.grid(row= 0, column= 0, sticky = "NW")
+
+        self.P_var = tk.StringVar()
+        display_label = tk.Label(P_frame, textvariable= self.P_var)
+        display_label.grid(row=0, column= 0, sticky = "NW")
+
+        self.K_var = tk.StringVar()
+        display_label = tk.Label(K_frame, textvariable= self.K_var)
+        display_label.grid(row=0, column= 0, sticky = "NW")
 
         # values
         self.true_val_idx = np.ones((2, stored_values))*-1
@@ -47,44 +78,25 @@ class Gui:
         X0 = [int(canvas_width/2), 0, int(canvas_height/2), 0]
         self.kf = KalmanFilter(X0)
 
-        # labels
-        l1 = tk.Label(master, text = f"\tRed: true\t\tBlue: measured\t\tGreen: estimated")
-        l1.grid(row = 1, columnspan=1, sticky = "EW")
-        #l2 = tk.Label(master, text = "")
-        #l2.grid(row = 3, sticky = "EW")#
 
-        l2 = tk.Label(master, text= f"\tTrue\tMeas\tEst")
-        l2.grid(row = 4, columnspan=1,sticky = "W")#
+    def update_matrix_label(self, lab, m, name):
+        r,c = m.shape
+        s = ""
+        for i in range(r):
+            for j in range(c):
+                s += f"{m[i,j]:.2f}\t"
+            s += f"\r"
+        ss = name + f":\n" + s
+        lab.set(ss)
 
-        self.lx_var = tk.StringVar()
-        self.update_labels(self.lx_var, "X")
-        l_X = tk.Label(master, textvariable= self.lx_var)
-        l_X.grid(row = 5, columnspan=1,sticky = "W")#
 
-        self.lvx_var = tk.StringVar()
-        self.update_labels(self.lvx_var, "vX")
-        l_X = tk.Label(master, textvariable= self.lvx_var)
-        l_X.grid(row = 6, columnspan=1,sticky = "W")#
-
-        self.ly_var = tk.StringVar()
-        self.update_labels(self.ly_var, "Y")
-        l_Y = tk.Label(master, textvariable= self.ly_var)
-        l_Y.grid(row = 7, columnspan=1,sticky = "W")
-
-        self.lvy_var = tk.StringVar()
-        self.update_labels(self.lvy_var, "vY")
-        l_X = tk.Label(master, textvariable= self.lvy_var)
-        l_X.grid(row = 8, sticky = "W")#
-
-        fff = tk.Label(master, text= "pffffffffffff")
-        fff.grid(row = 8, column=1, sticky = "W")#
-
-        #e1 = tk.Entry(master)
-        #e1.grid(row = 5, column = 0, sticky = "W", pady = 2)
-
-    def update_labels(self, lab, s1, s2="", s3="", s4=""):
-        s = f"{s1}\t{s2}\t{s3}\t{s4}"
-        lab.set(str(s))
+    def update_display_labels(self, lab, x_true, y_true, x_meas, y_meas, x_est, y_est, vx_est, vy_est):
+        header = f"\tTrue\tMeas\tEst\n"
+        x = f"X:\t{x_true}\t{x_meas}\t{x_est}\n"
+        y = f"Y:\t{y_true}\t{y_meas}\t{y_est}\n"
+        vx = f"VX:\t\t\t{vx_est}\n"
+        vy = f"VY:\t\t\t{vy_est}\r"
+        lab.set(header+x+y+vx+vy)
 
 
     def update_canvas(self, event):
@@ -115,10 +127,7 @@ class Gui:
         vy_est = np.int(np.asscalar(np.round(vy_est)))
         x_meas = np.int(np.asscalar(np.round(x_meas)))
         y_meas = np.int(np.asscalar(np.round(y_meas)))
-        #print(x_true, y_true)
-        #print(x_est, y_est)
-        #print("")
-        # edit canvas
+
         d = self.canvas_oval_delta
         if self.Show_True_Values:
             self.true_val_idx = self.remove_points(x_true, y_true, self.true_val_idx, "cross")
@@ -130,10 +139,9 @@ class Gui:
             self.meas_val_idx = self.remove_points(x_meas, y_meas, self.meas_val_idx, "oval")
             self.w.create_oval(x_meas-d, y_meas-d, x_meas+self.canvas_oval_delta, y_meas+self.canvas_oval_delta, fill= self.canvas_measurement_color )
 
-        self.update_labels(self.lx_var , "X", str(x_true), str(x_meas), str(x_est))
-        self.update_labels(self.lvx_var , "vX", "", "", str(vx_est))
-        self.update_labels(self.ly_var , "Y", str(y_true), str(y_meas), str(y_est))
-        self.update_labels(self.lvy_var , "vY", "", "", str(vy_est))
+        self.update_display_labels(self.display_var, x_true, y_true, x_meas, y_meas, x_est, y_est, vx_est, vy_est)
+        self.update_matrix_label(self.P_var, self.kf.P, "P")
+        self.update_matrix_label(self.K_var, self.kf.K, "K")
 
 
     def draw_cross(self, x, y, color):

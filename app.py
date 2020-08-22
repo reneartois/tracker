@@ -4,7 +4,6 @@ from gui import Gui
 
 def main():
     root = tk.Tk()
-    root.title("Estimator")
     app = Gui(root)
     root.mainloop()
 
