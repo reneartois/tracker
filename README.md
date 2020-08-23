@@ -20,6 +20,6 @@ Signal Processing Magazine, IEEE , vol.29, no.5, pp.128-132, Sept. 2012 doi: 10.
 - https://www.cs.utexas.edu/~teammco/misc/kalman_filter/
 
 
-##todo:
-- [] Frame below canvas not appearing until first click  
-- [] Better text formatting    
+## todo:
+- [ ] Frame below canvas not appearing until first click  
+- [ ] Better text formatting    
