@@ -1,6 +1,6 @@
 # tracker
 Visualize kalman filter.  
-A click on the canvas is the true position(red), and a noise measurement is made(blue).  
+A click(or drag) on the canvas is the true position(red), and a noisy measurement is made(blue).  
 A kalman filter with a constant velocity-model tries to estimate the true position utilizing both  
 the noisy measurements and its internal model. The estimated position is shown in green.  
 
