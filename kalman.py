@@ -11,7 +11,7 @@ class KalmanFilter:
         KF
         ---
         Attributes:
-        Initialized using config.py
+        Initialized using config.py (and X0, nz)
         """
         # state vector
         if X0 is None:

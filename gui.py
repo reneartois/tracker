@@ -1,27 +1,38 @@
 import tkinter as tk
 import numpy as np
 from kalman import KalmanFilter
+import config
 
 class Gui:
 
     def __init__(self, master):
+        """
+        Canvas frame for clicking to set true postion.
+        Noise measurements are made from these points, and the kalman filter
+        estimates the position based on measurements and the underlying model.
+        These points are visualized on a canvas.
+        ---
+        Attributes:
+        initalized with config.py
+        """
         # settings
-        master.title("Estimator")
-        master_width = 1000
-        master_heigth = 600
+        master.title(config.master_title)
+        master_width = config.master_width
+        master_heigth = config.master_heigth
         master.geometry(f"{master_width}x{master_heigth}")
-        self.Show_True_Values = True
-        self.Show_Measured_Values = True
-        self.Show_Est_Values = True
-        self.sigma = 30
-        self.mu = 0
-        self.canvas_oval_delta = 3
-        stored_values = 40
+        self.Show_True_Values = config.show_true_values
+        self.Show_Measured_Values = config.show_measured_values
+        self.Show_Est_Values = config.show_est_values
+        self.sigma = config.sigma
+        self.mu = config.mu
+        self.canvas_oval_delta = config.canvas_oval_delta
+        stored_values = config.n_stored_values
 
         # frames
-        canvas_width = 1000
-        canvas_height =400
-        main_frame_heigth = 200
+        canvas_width = config.canvas_width
+        canvas_height = config.canvas_height
+        main_frame_heigth = config.main_frame_heigth
+        main_frame_width = config.main_frame_width
         canvas_frame = tk.Frame(master, height= canvas_height)
         main_frame = tk.Frame(master, width= canvas_width, height= main_frame_heigth)
 
@@ -34,10 +45,10 @@ class Gui:
         main_frame.grid(row=1, column= 0, sticky= "NESW", padx= 5, pady= 5)
 
         # canvas
-        self.canvas_bg_color = "black"
-        self.canvas_true_val_color = "red"
-        self.canvas_measurement_color = "blue"
-        self.canvas_estimate_color = "green"
+        self.canvas_bg_color = config.canvas_bg_color
+        self.canvas_true_val_color = config.canvas_true_val_color
+        self.canvas_measurement_color = config.canvas_measurement_color
+        self.canvas_estimate_color = config.canvas_estimate_color
         self.w = tk.Canvas(canvas_frame,
                bg= self.canvas_bg_color)
         self.w.pack(fill="both", expand=True)
@@ -45,14 +56,13 @@ class Gui:
         self.w.bind("<Button-1>", self.update_canvas)   #click
 
         # display frames
-        frame_width=350
-        padx= 40
-        pady=5
-        display_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        padx = config.display_padx
+        pady = config.display_pady
+        display_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         display_frame.grid(row=0, column=0, sticky= "NW")
-        P_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        P_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         P_frame.grid(row=0, column=1, sticky= "NW")
-        K_frame = tk.Frame(main_frame, width=frame_width, height= main_frame_heigth, padx= padx, pady= pady)
+        K_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         K_frame.grid(row=0, column=2, sticky= "NW")
 
         # display frame labels
@@ -76,7 +86,7 @@ class Gui:
         # kalman filter
         # only position measurement
         X0 = [int(canvas_width/2), 0, int(canvas_height/2), 0]
-        self.kf = KalmanFilter(X0)
+        self.kf = KalmanFilter(X0= X0, nz= 2)
 
 
     def update_matrix_label(self, lab, m, name):
@@ -100,6 +110,11 @@ class Gui:
 
 
     def update_canvas(self, event):
+        """
+        After click: extracts x,y-pos.
+        Generates measurements, adds noise, position estimated by kalman filter.
+        Updates canvas.
+        """
         # true values
         x_true = (event.x)
         y_true = (event.y)
@@ -109,7 +124,7 @@ class Gui:
         # add noise
         self.kf.make_measurement(np.array([x_meas, 0, y_meas, 0]).T)
 
-        # update
+        # update estimate
         K = np.array(self.kf.update_kalman_gain()).T
         [x_est, vx_est, y_est, vy_est] = np.array(self.kf.estimate_current_state()).T
         P = self.kf.update_estimate_uncertainty()
@@ -146,6 +161,7 @@ class Gui:
 
 
     def draw_points(self, val, type, color):
+        """draw oval or cross on points in val"""
         d = self.canvas_oval_delta
         for [x, y] in val.T:
             if x > -1:
@@ -156,6 +172,7 @@ class Gui:
 
 
     def update_points(self,val, x, y):
+        """Shifts val one position and inserts x,y 0"""
         val[:, :] = np.roll(val, 1, axis= 1)
         val[:, 0] = [x, y]
         return val
@@ -171,6 +188,7 @@ class Gui:
 
 
     def generate_measurements(self, X):
+        """Returns X-array with noise"""
         """ Add random noise"""
         r =X + np.random.randn(1, len(X)) * self.sigma + self.mu
         return np.reshape(r, (len(X)))
