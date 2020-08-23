@@ -1,5 +1,5 @@
 """
-config file for KalmanFilter_Custom
+config file for KalmanFilter
 Depending on X0, the corresponding subset of matrices are used.
 Ex X0= [1, 0]' and nz=1: H[nz, nx].shape = (1,2)
 """
