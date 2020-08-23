@@ -60,8 +60,10 @@ class Gui:
         pady = config.display_pady
         display_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         display_frame.grid(row=0, column=0, sticky= "NW")
+
         P_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         P_frame.grid(row=0, column=1, sticky= "NW")
+
         K_frame = tk.Frame(main_frame, width=main_frame_width, height= main_frame_heigth, padx= padx, pady= pady)
         K_frame.grid(row=0, column=2, sticky= "NW")
 
@@ -105,7 +107,7 @@ class Gui:
         x = f"X:\t{x_true}\t{x_meas}\t{x_est}\n"
         y = f"Y:\t{y_true}\t{y_meas}\t{y_est}\n"
         vx = f"VX:\t\t\t{vx_est}\n"
-        vy = f"VY:\t\t\t{vy_est}\r"
+        vy = f"VY:\t\t\t{vy_est}\n"
         lab.set(header+x+y+vx+vy)
 
 
