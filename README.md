@@ -23,3 +23,4 @@ Signal Processing Magazine, IEEE , vol.29, no.5, pp.128-132, Sept. 2012 doi: 10.
 ## todo:
 - [ ] Frame below canvas not appearing until first click  
 - [ ] Better text formatting    
+- [ ] Better init of KF  
