@@ -9,6 +9,9 @@ the noisy measurements and its internal model. The estimated position is shown i
 in python env:  
 pip install -r requirements.txt  
 python app.py  
+edit settings in config.py
+  
+note: you might need to install tkinter: https://tkdocs.com/tutorial/install.html#install-x11-python  
 
 
 ## some inspiration:
